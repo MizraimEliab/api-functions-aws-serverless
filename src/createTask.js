@@ -2,7 +2,7 @@ const {v4} = require('uuid')
 const AWS = require('aws-sdk')
 
 const createTask = async(event)=>{
-    const dynamoDb = new AWS.DynamoDB.DocumentClient();
+    const dynamodb = new AWS.DynamoDB.DocumentClient();
 
     const {title, description} = JSON.parse(event.body) 
     const createdAt = new Date();
@@ -15,7 +15,7 @@ const createTask = async(event)=>{
         createdAt
     }
 
-    await dynamoDb.put({
+    await dynamodb.put({
         TableName: 'TaskTable',
         Item: newTask
     }).promise()
