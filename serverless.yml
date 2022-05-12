@@ -3,6 +3,11 @@ frameworkVersion: '3'
 
 provider:
   name: aws
+  httpApi:
+    authorizers:
+      customAuthorizer:
+        type: request
+        functionName: authorizerFunc
   runtime: nodejs14.x
   region: us-east-1
   iamRoleStatements:
@@ -11,6 +16,7 @@ provider:
         - dynamodb:*
       Resource:
        - arn:aws:dynamodb:us-east-1:199946772998:table/TaskTable
+       - arn:aws:dynamodb:us-east-1:199946772998:table/UserTable
 
 functions:
   hello:
@@ -31,6 +37,11 @@ functions:
       - httpApi:
           path: /tasks
           method: get
+          authorizer: 
+            name: customAuthorizer
+  authorizerFunc:
+    handler: src/auth.verifyToken
+
   getTask:
     handler: src/getTask.getTask
     events:
@@ -49,6 +60,12 @@ functions:
       - httpApi:
           path: /tasks/{id}
           method: delete
+  createToken:
+    handler: src/auth.createToken
+    events:
+      - httpApi:
+          path: /createToken
+          method: post
 
 resources:
   Resources:
@@ -62,4 +79,15 @@ resources:
             AttributeType: S
         KeySchema:
             - AttributeName: id
-              KeyType: HASH  
+              KeyType: HASH
+    UserTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: UserTable
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+            - AttributeName: id
+              KeyType: HASH
